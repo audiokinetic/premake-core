@@ -55,3 +55,38 @@ function suite.flags_csversion()
 	csversion "7.2"
 	test.contains({ "/langversion:7.2" }, dotnet.getflags(cfg))
 end
+
+
+	-- Explicit buildaction "Page" must produce "Page" even when the filename is "App.xaml"
+	function suite.fileinfo_xaml_explicitPage_withAppFilename()
+		local fcfg = {
+			abspath = "App.xaml",
+			buildaction = "Page",
+			project = { kind = p.CONSOLEAPP, _ = { files = {} } },
+		}
+		local info = dotnet.fileinfo(fcfg)
+		test.isequal("Page", info.action)
+	end
+
+	-- Explicit buildaction "Application" produces "ApplicationDefinition".
+	function suite.fileinfo_xaml_explicitApplication()
+		local fcfg = {
+			abspath = "MyWindow.xaml",
+			buildaction = "Application",
+			project = { kind = p.CONSOLEAPP, _ = { files = {} } },
+		}
+		local info = dotnet.fileinfo(fcfg)
+		test.isequal("ApplicationDefinition", info.action)
+	end
+
+	-- Any other valid buildaction (here "None") with filename "App.xaml" triggers
+	-- the filename heuristic and produces "ApplicationDefinition".
+	function suite.fileinfo_xaml_otherBuildaction_appFilenameHeuristic()
+		local fcfg = {
+			abspath = "App.xaml",
+			buildaction = "None",
+			project = { kind = p.CONSOLEAPP, _ = { files = {} } },
+		}
+		local info = dotnet.fileinfo(fcfg)
+		test.isequal("ApplicationDefinition", info.action)
+	end

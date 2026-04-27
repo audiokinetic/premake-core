@@ -65,7 +65,14 @@
 		elseif fcfg.buildaction == "Resource" then
 			info.action = "Resource"
 		elseif ext == ".xaml" then
-			if fcfg.buildaction == "Application" or path.getbasename(fname) == "App" then
+			local isPage = fcfg.buildaction == "Page"
+			local isApp = fcfg.buildaction == "Application"
+			if not isPage and not isApp then
+				-- Detect whether the filename follows the "App" convention
+				isApp = path.getbasename(fname) == "App"
+			end
+
+			if isApp then
 				if fcfg.project.kind == p.SHAREDLIB then
 					info.action = "None"
 				else
