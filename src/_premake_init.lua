@@ -946,6 +946,28 @@
 	}
 
 	api.register {
+		name = "vcxfiltersfiles",
+		scope = "project",
+		kind = "string",
+		allowed = {
+			"Default",
+			"Omit",   -- suppress .vcxproj.filters generation
+			"Force",  -- always write .vcxproj.filters even when source tree is flat
+		}
+	}
+
+	api.register {
+		name = "vcxuserfiles",
+		scope = "project",
+		kind = "string",
+		allowed = {
+			"Default",
+			"Omit",   -- suppress .vcxproj.user generation
+			"Force",  -- always write .vcxproj.user even when empty
+		}
+	}
+
+	api.register {
 		name = "vectorextensions",
 		scope = "config",
 		kind = "string",

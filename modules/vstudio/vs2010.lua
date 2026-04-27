@@ -100,16 +100,19 @@
 			else
 				local projFileModified = p.generate(prj, ".vcxproj", vstudio.vc2010.generate)
 
-				-- Skip generation of empty user files
+			-- Skip generation of empty user files, unless vcxuserfiles is "Omit" or "Force"
+			if prj.vcxuserfiles ~= "Omit" then
 				local user = p.capture(function() vstudio.vc2010.generateUser(prj) end)
-				if #user > 0 then
+				if prj.vcxuserfiles == "Force" or #user > 0 then
 					p.generate(prj, ".vcxproj.user", function() p.outln(user) end)
 				end
+			end
 
-				-- Only generate a filters file if the source tree actually has subfolders
-				if tree.hasbranches(project.getsourcetree(prj)) then
+			-- Only generate a filters file if the source tree actually has subfolders,
+			-- unless vcxfiltersfiles is "Omit" or "Force"
+			if prj.vcxfiltersfiles ~= "Omit" and (prj.vcxfiltersfiles == "Force" or tree.hasbranches(project.getsourcetree(prj))) then
 					if p.generate(prj, ".vcxproj.filters", vstudio.vc2010.generateFilters) == true and projFileModified == false then
-						-- vs workaround for issue where if only the .filters file is modified, VS doesn't automaticly trigger a reload
+						-- vs workaround for issue where if only the .filters file is modified, VS doesn't automatically trigger a reload
 						p.touch(prj, ".vcxproj")
 					end
 				end

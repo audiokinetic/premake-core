@@ -293,6 +293,8 @@ module.exports = {
 						'usestandardpreprocessor',
 						'usingdirs',
 						'uuid',
+						'vcxfiltersfiles',
+						'vcxuserfiles',
 						'vectorextensions',
 						'visibility',
 						'vpaths',

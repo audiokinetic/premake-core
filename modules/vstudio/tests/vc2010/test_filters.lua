@@ -7,6 +7,7 @@
 	local p = premake
 	local suite = test.declare("vs2010_filters")
 	local vc2010 = p.vstudio.vc2010
+	local vs2010 = p.vstudio.vs2010
 
 
 --
@@ -211,4 +212,52 @@
 	<Image Include="hello.png" />
 </ItemGroup>
 		]]
+	end
+
+
+--
+-- Check the vcxfiltersfiles API controls whether .vcxproj.filters is generated.
+-- Uses a spy on p.generate to track which file extensions are requested.
+--
+
+	local function prepareProject()
+		local calls = {}
+		local origGenerate = p.generate
+		p.generate = function(obj, ext, cb)
+			table.insert(calls, ext)
+			return false
+		end
+		vs2010.generateProject(test.getproject(wks, 1))
+		p.generate = origGenerate
+		return calls
+	end
+
+	function suite.vcxfiltersfiles_notGenerated_onDefault_withFlatSource()
+		-- Default behaviour: flat source tree (no subfolders) → .vcxproj.filters is NOT generated.
+		files { "hello.c", "goodbye.c" }
+		local calls = prepareProject()
+		test.excludes({ ".vcxproj.filters" }, calls)
+	end
+
+	function suite.vcxfiltersfiles_generated_onDefault_withNestedSource()
+		-- Default behaviour: nested source tree (subfolders present) → .vcxproj.filters IS generated.
+		files { "src/hello.c", "goodbye.c" }
+		local calls = prepareProject()
+		test.contains({ ".vcxproj.filters" }, calls)
+	end
+
+	function suite.vcxfiltersfiles_generated_onForce_withFlatSource()
+		-- Force: flat source tree, but .vcxproj.filters is always generated.
+		files { "hello.c", "goodbye.c" }
+		vcxfiltersfiles "Force"
+		local calls = prepareProject()
+		test.contains({ ".vcxproj.filters" }, calls)
+	end
+
+	function suite.vcxfiltersfiles_notGenerated_onOmit_withNestedSource()
+		-- Omit: nested source tree, but .vcxproj.filters generation is suppressed.
+		files { "src/hello.c", "goodbye.c" }
+		vcxfiltersfiles "Omit"
+		local calls = prepareProject()
+		test.excludes({ ".vcxproj.filters" }, calls)
 	end
